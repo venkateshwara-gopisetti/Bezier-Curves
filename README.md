@@ -7,7 +7,7 @@ A __Bézier curve__ (/ˈbɛz.i.eɪ/ BEH-zee-ay) is a parametric curve used in co
 
 
 <center>
-<img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/BezierCurve.gif" height=200 width=250 alt-text="Bezier Curve animation from wikipedia">
+<img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/BezierCurve.gif" height=200 width=250 alt="Bezier Curve animation from wikipedia">
 </center>
 
 <br>
@@ -26,4 +26,4 @@ For performance and aesthetics, it is not suggested to use verbose with more tha
 Wikipedia contributors. (2022, May 12). Bézier curve. In Wikipedia, The Free Encyclopedia. Retrieved 16:05, May 14, 2022, from https://en.wikipedia.org/w/index.php?title=B%C3%A9zier_curve&oldid=1087492283
 <br>
 
-[Bezier Curve on Wikipedia](https://en.wikipedia.org/w/index.php?title=B%C3%A9zier_curve&oldid=1087492283)
+[Bezier Curve on Wikipedia](https://en.wikipedia.org/wiki/B%C3%A9zier_curve)
