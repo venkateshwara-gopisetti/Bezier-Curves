@@ -22,7 +22,7 @@ def main():
     )
     parser.add_argument("-n", help="Number of seed points", type=int)
     parser.add_argument("-f", "--frames", help="Number of frames to generate", type=int, default=100)
-    parser.add_argument("-v", "--verbose", help="display intermediate bezier curves",
+    parser.add_argument("-v", "--verbose", help="Display intermediate bezier curves",
                         action="store_true")
     args = parser.parse_args()
 
