@@ -20,7 +20,7 @@ def main():
         description="A cli utility to generate bezier curve with some inputs.",
         epilog="And that's how you generate the Bezier Curve."
     )
-    parser.add_argument("-n", help="Number of seed points", type=int)
+    parser.add_argument("-n", help="Number of seed points", type=int, required=True)
     parser.add_argument("-f", "--frames", help="Number of frames to generate", type=int, default=100)
     parser.add_argument("-v", "--verbose", help="Display intermediate bezier curves",
                         action="store_true")
