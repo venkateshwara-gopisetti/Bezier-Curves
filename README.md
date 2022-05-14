@@ -1,4 +1,6 @@
 # Bézier-Curves
+[![CodeQL](https://github.com/venkateshwara-gopisetti/Bezier-Curves/actions/workflows/codeql-analysis.yml/badge.svg?branch=master)](https://github.com/venkateshwara-gopisetti/Bezier-Curves/actions/workflows/codeql-analysis.yml)
+[![Pylint](https://github.com/venkateshwara-gopisetti/Bezier-Curves/actions/workflows/pylint.yml/badge.svg?branch=master)](https://github.com/venkateshwara-gopisetti/Bezier-Curves/actions/workflows/pylint.yml)
 ### Python implementation for Bezier curves.
 
 <br>
