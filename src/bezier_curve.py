@@ -56,9 +56,9 @@ def plot_line(color_list: list, label: str, points_list: list) -> list:
     for ind in range(len(lines)-1):
         xseries,yseries = np.array(lines[ind:ind+2]).T
         plots.append(plt.plot(xseries, yseries, color_list[ind], alpha=0.5))
-        plots.append(plt.annotate('%s%s'%(label, ind), lines[ind]))
+        plots.append(plt.annotate(f'{label}{ind}', lines[ind]))
     # plot the label on last point.
-    plots.append(plt.annotate('%s%s'%(label, ind+1), lines[ind+1]))
+    plots.append(plt.annotate('{label}{ind+1}', lines[ind+1]))
     # return plot objects for garbage collection.
     return plots
 
@@ -71,6 +71,7 @@ def gc_plot_objects(objs):
         else:
             line_obj.set_visible(False)
 
+# pylint: disable=R0914
 def generate_bezier_curve(points: list, frame_count:int = 100, verbose: bool=False):
     """
     Function that takes in a list of seed points and generates a bezier curve.
@@ -94,7 +95,7 @@ def generate_bezier_curve(points: list, frame_count:int = 100, verbose: bool=Fal
     curve_levels = len(points)
 
     fig = plt.figure(figsize=(12,8))
-    fig.suptitle('Bezier Curve (order-%s)'%curve_levels, fontsize=20)
+    fig.suptitle(f'Bezier Curve (order-{curve_levels})', fontsize=20)
     plt.axis([-100, 100, -100, 100])
 
     level_labels = [chr(ord('A')+k) for k in range (curve_levels)]
