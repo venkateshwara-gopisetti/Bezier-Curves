@@ -17,9 +17,6 @@ from matplotlib.colors import rgb2hex
 # Custom Functions
 # =============================================================================
 
-# Define number of frames to generate.
-FRAMES = 100
-
 def lin_bez(t: float, points_list: list) -> np.array:
     """
     Linear Bezier Curve function.
@@ -74,13 +71,15 @@ def gc_plot_objects(objs):
         else:
             line_obj.set_visible(False)
 
-def generate_bezier_curve(points: list, verbose: bool=False):
+def generate_bezier_curve(points: list, frame_count:int = 100, verbose: bool=False):
     """
     Function that takes in a list of seed points and generates a bezier curve.
     Parameters
     ----------
     points : list
         list of seed points.
+    FRAMES : int
+        number of frames to generate the curve on. The default is 100.
     verbose : bool, optional
         Verbosity for the graphing.
         If False, only original points, lines and final bezier curve is plotted.
@@ -89,15 +88,14 @@ def generate_bezier_curve(points: list, verbose: bool=False):
     Returns
     -------
     None.
-
     """
-    fig = plt.figure(figsize=(12,8))
-    fig.suptitle('Bezier Curve', fontsize=20)
-    plt.axis([-100, 100, -100, 100])
-
-    tframe = np.linspace(0,1,FRAMES)
+    tframe = np.linspace(0, 1, frame_count)
 
     curve_levels = len(points)
+
+    fig = plt.figure(figsize=(12,8))
+    fig.suptitle('Bezier Curve (order-%s)'%curve_levels, fontsize=20)
+    plt.axis([-100, 100, -100, 100])
 
     level_labels = [chr(ord('A')+k) for k in range (curve_levels)]
 
@@ -106,9 +104,8 @@ def generate_bezier_curve(points: list, verbose: bool=False):
 
     # Data Structure to store coordinates for each frame.
     # Frame - Visual Frame
-    #   Level - Each bezier curve of order N, has N groups of lines - First set of lines from the seed points, 
-    #           and then each consecutive line group for intermediate bezier curves.
-    #       Part - 
+    # -Level - Each bezier curve of order N, has N groups of lines - First set of lines from the seed points, and then each consecutive line group for intermediate bezier curves.
+    # --Part - Each line in a level is called a part.
     graph_stack = {
         frame:{
             level:{
@@ -188,12 +185,11 @@ def generate_start_points(n_points: int=3) -> list:
     -------
     list
         listr of starting points.
-
     """
     points = np.random.randint(-100, 100, (n_points, 2))
     return points
 
 if __name__ == "__main__":
-    points = generate_start_points(5)
-    generate_bezier_curve(points, True)
+    points = generate_start_points(n_points=5)
+    generate_bezier_curve(points=points, verbose=True)
     plt.show()
