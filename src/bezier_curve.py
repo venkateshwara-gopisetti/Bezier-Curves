@@ -17,12 +17,12 @@ from matplotlib.colors import rgb2hex
 # Custom Functions
 # =============================================================================
 
-def lin_bez(t: float, points_list: list) -> np.array:
+def lin_bez(frame: float, points_list: list) -> np.array:
     """
     Linear Bezier Curve function.
     Parameters
     ----------
-    t : float
+    frame : float
         index at which to calculate bezier on.
     points_list : list
         list of points to calculate bezier curve on.
@@ -32,7 +32,7 @@ def lin_bez(t: float, points_list: list) -> np.array:
         coordinates of the bezier point.
     """
     point0, point1 = points_list
-    return np.sum([np.multiply(1-t, point0), np.multiply(t, point1)], axis=0).reshape(1,2)
+    return np.sum([np.multiply(1-frame, point0), np.multiply(frame, point1)], axis=0).reshape(1,2)
 
 def plot_line(color_list: list, label: str, points_list: list) -> list:
     """
@@ -54,8 +54,8 @@ def plot_line(color_list: list, label: str, points_list: list) -> list:
     plots = []
     # For each consecutive pair of points, plot a line and the text label on starting point.
     for ind in range(len(lines)-1):
-        xs,ys = np.array(lines[ind:ind+2]).T
-        plots.append(plt.plot(xs, ys, color_list[ind], alpha=0.5))
+        xseries,yseries = np.array(lines[ind:ind+2]).T
+        plots.append(plt.plot(xseries, yseries, color_list[ind], alpha=0.5))
         plots.append(plt.annotate('%s%s'%(label, ind), lines[ind]))
     # plot the label on last point.
     plots.append(plt.annotate('%s%s'%(label, ind+1), lines[ind+1]))
@@ -64,7 +64,7 @@ def plot_line(color_list: list, label: str, points_list: list) -> list:
 
 def gc_plot_objects(objs):
     """collection of matplotlib objects to remove from the plot figure.
-    """    
+    """
     for line_obj in objs:
         if isinstance(line_obj, list):
             line_obj[0].remove()
@@ -78,7 +78,7 @@ def generate_bezier_curve(points: list, frame_count:int = 100, verbose: bool=Fal
     ----------
     points : list
         list of seed points.
-    FRAMES : int
+    frame_count : int
         number of frames to generate the curve on. The default is 100.
     verbose : bool, optional
         Verbosity for the graphing.
@@ -104,7 +104,9 @@ def generate_bezier_curve(points: list, frame_count:int = 100, verbose: bool=Fal
 
     # Data Structure to store coordinates for each frame.
     # Frame - Visual Frame
-    # -Level - Each bezier curve of order N, has N groups of lines - First set of lines from the seed points, and then each consecutive line group for intermediate bezier curves.
+    # -Level - (Each bezier curve of order N, has N groups of lines.
+    #           First set of lines from the seed points, and then each
+    #           consecutive line group for intermediate bezier curves.
     # --Part - Each line in a level is called a part.
     graph_stack = {
         frame:{
@@ -118,40 +120,47 @@ def generate_bezier_curve(points: list, frame_count:int = 100, verbose: bool=Fal
 
     # Dividing Viridis color map into equivalent colors as many lines are there.
     cmap = plt.cm.viridis(np.linspace(0,1,int(np.ceil(curve_levels*(curve_levels-1)/2))))
-    
+
     # Conversion from array to hex
-    cmap_list = [rgb2hex(ele[:3]) for ele in cmap]
+    cmap = [rgb2hex(ele[:3]) for ele in cmap]
 
     # Assignment of color to line.
     color_list = []
     cnt = 0
     for level in range(1, curve_levels):
-        color_list.append(cmap_list[cnt:cnt+(curve_levels-level)])
+        color_list.append(cmap[cnt:cnt+(curve_levels-level)])
         cnt+=level
 
     # Plot seed points and lines.
     plot_line(color_list[0], level_labels[0], points)
 
     # Generate curve for each frame.
-    for frame, t in enumerate(tframe):
+    for frame_index, frame_time in enumerate(tframe):
         for ind, pnt in enumerate(points):
-            graph_stack[frame][0][ind] = pnt.reshape(1,2)
+            graph_stack[frame_index][0][ind] = pnt.reshape(1,2)
         for level in range(1, curve_levels):
-            for part in graph_stack[frame][level].keys():
+            for part in graph_stack[frame_index][level].keys():
                 points_to_use = [
-                    graph_stack[frame][level-1][part],
-                    graph_stack[frame][level-1][part+1]
+                    graph_stack[frame_index][level-1][part],
+                    graph_stack[frame_index][level-1][part+1]
                 ]
-                graph_stack[frame][level][part] = \
+                graph_stack[frame_index][level][part] = \
                     lin_bez(
-                        t,
+                        frame_time,
                         points_to_use
                     )
             # if last level, draw bezier point for current frame.
             if level == curve_levels-1:
-                bt_curve = np.append(bt_curve, graph_stack[frame][level][part], axis=0)
-                xs, ys = bt_curve.T
-                bezier_plot_object = plt.plot(xs, ys, label="Bezier Curve", color='black', linewidth=0.5)
+                bt_curve = np.append(bt_curve, graph_stack[frame_index][level][0], axis=0)
+                xseries, yseries = bt_curve.T
+                bezier_plot_object = \
+                    plt.plot(
+                        xseries,
+                        yseries,
+                        label="Bezier Curve",
+                        color='black',
+                        linewidth=0.5
+                    )
             else:
                 # If verbose, draw intermediate bezier curves.
                 if verbose:
@@ -161,7 +170,7 @@ def generate_bezier_curve(points: list, frame_count:int = 100, verbose: bool=Fal
                         plot_line(
                             color_list[level-1],
                             level_labels[level],
-                            [x[-1] for x in graph_stack[frame][level].values()]
+                            [x[-1] for x in graph_stack[frame_index][level].values()]
                         )
                 else:
                     continue
@@ -172,7 +181,7 @@ def generate_bezier_curve(points: list, frame_count:int = 100, verbose: bool=Fal
             gc_plot_objects(plot_stack[level])
     plt.legend(handles=[bezier_plot_object[0]])
     plt.pause(0.01)
-    
+
 
 def generate_start_points(n_points: int=3) -> list:
     """
@@ -190,6 +199,6 @@ def generate_start_points(n_points: int=3) -> list:
     return points
 
 if __name__ == "__main__":
-    points = generate_start_points(n_points=5)
-    generate_bezier_curve(points=points, verbose=True)
+    seed_points = generate_start_points(n_points=5)
+    generate_bezier_curve(points=seed_points, verbose=True)
     plt.show()

@@ -15,14 +15,29 @@ import matplotlib.pyplot as plt
 from src.bezier_curve import generate_start_points, generate_bezier_curve
 
 def main():
+    """
+    Main function to interact with CLI.
+    Returns
+    -------
+    None.
+    """
     parser = argparse.ArgumentParser(
         prog="Bezier Curve",
         description="A cli utility to generate bezier curve with some inputs.",
         epilog="And that's how you generate the Bezier Curve."
     )
-    parser.add_argument("-n", help="Number of seed points", type=int, required=True)
-    parser.add_argument("-f", "--frames", help="Number of frames to generate", type=int, default=100)
-    parser.add_argument("-v", "--verbose", help="Display intermediate bezier curves",
+    parser.add_argument("-n",
+                        help="Number of seed points",
+                        type=int,
+                        required=True)
+    parser.add_argument("-f",
+                        "--frames",
+                        help="Number of frames to generate",
+                        type=int,
+                        default=100)
+    parser.add_argument("-v",
+                        "--verbose",
+                        help="Display intermediate bezier curves",
                         action="store_true")
     args = parser.parse_args()
 
