@@ -58,7 +58,7 @@ def plot_line(color_list: list, label: str, points_list: list) -> list:
         plots.append(plt.plot(xseries, yseries, color_list[ind], alpha=0.5))
         plots.append(plt.annotate(f'{label}{ind}', lines[ind]))
     # plot the label on last point.
-    plots.append(plt.annotate('{label}{ind+1}', lines[ind+1]))
+    plots.append(plt.annotate(f'{label}{ind+1}', lines[ind+1]))
     # return plot objects for garbage collection.
     return plots
 
@@ -93,8 +93,10 @@ def generate_bezier_curve(points: list, frame_count:int = 100, verbose: bool=Fal
     tframe = np.linspace(0, 1, frame_count)
 
     curve_levels = len(points)
-
-    fig = plt.figure(figsize=(12,8))
+    px_val = 1/plt.rcParams['figure.dpi']
+    fig = plt.figure(figsize=(600*px_val, 600*px_val))
+    # fig_manager = plt.get_current_fig_manager()
+    # fig_manager.window.showMaximized()
     fig.suptitle(f'Bezier Curve (order-{curve_levels})', fontsize=20)
     plt.axis([-100, 100, -100, 100])
 
@@ -120,6 +122,7 @@ def generate_bezier_curve(points: list, frame_count:int = 100, verbose: bool=Fal
     plot_stack = {level:None for level in range(curve_levels)}
 
     # Dividing Viridis color map into equivalent colors as many lines are there.
+    # pylint: disable=no-member
     cmap = plt.cm.viridis(np.linspace(0,1,int(np.ceil(curve_levels*(curve_levels-1)/2))))
 
     # Conversion from array to hex
