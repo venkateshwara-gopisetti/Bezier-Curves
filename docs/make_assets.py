@@ -5,6 +5,7 @@
 
 from pathlib import Path
 
+import matplotlib
 import numpy as np
 from matplotlib.collections import LineCollection
 from matplotlib.figure import Figure
@@ -19,7 +20,7 @@ CUBIC = [[0, 0], [5, 10], [9, 7], [4, 3]]
 def draw_construction(ax, ctrl, t, labels=True):
     """Draw every de Casteljau level at parameter t plus the curve up to t."""
     steps = bv.casteljau_steps(ctrl, t)
-    cmap = __import__("matplotlib").colormaps["viridis"]
+    cmap = matplotlib.colormaps["viridis"]
     n = len(steps)
     for level, pts in enumerate(steps[:-1]):
         color = cmap(0.9 * level / max(n - 2, 1))
@@ -68,6 +69,7 @@ def social_preview():
 
 
 def main():
+    """Write every asset and print the file sizes."""
     ASSETS.mkdir(parents=True, exist_ok=True)
     bv.animate(HERO, frames=90, verbose=True, fps=30, hold=45, size=480).save(
         str(ASSETS / "hero.gif"))
