@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "beziervis: Bézier curve evaluation and de Casteljau animations for Python"
+abstract: >-
+  A Python library for evaluating and manipulating Bézier curves in any
+  dimension, with a vectorised NumPy core, optional Numba acceleration, and
+  animations of de Casteljau's algorithm.
+authors:
+  - family-names: Gopisetti
+    given-names: Venkateshwara
+version: 1.0.0
+date-released: 2026-11-24
+license: MIT
+repository-code: "https://github.com/venkateshwara-gopisetti/Bezier-Curves"
+keywords:
+  - bezier curve
+  - de Casteljau
+  - computational geometry
+  - visualization
+  - numpy
