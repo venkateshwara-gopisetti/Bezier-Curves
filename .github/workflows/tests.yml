@@ -1,0 +1,64 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / py${{ matrix.python }} / ${{ matrix.numba && 'numba' || 'numpy-only' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.10", "3.11", "3.12", "3.13"]
+        numba: [true, false]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: Install
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          if [ "${{ matrix.numba }}" = "true" ]; then
+            pip install -e ".[all]" pytest
+          else
+            pip install -e ".[anim]" pytest
+          fi
+      - name: Check backend
+        run: python -c "import beziervis as bv; print('backend:', bv.get_backend())"
+      - name: Test
+        run: pytest -q
+      - name: CLI smoke test (headless)
+        run: beziervis --points "0,0 5,10 9,7 4,3" --verbose --frames 10 --save smoke.gif
+
+  core-only:
+    name: core install (NumPy only, no matplotlib)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: pip install . pytest
+      - run: pytest -q   # animation tests skip themselves without matplotlib
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: pylint src/beziervis benchmarks docs

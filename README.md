@@ -9,7 +9,7 @@
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/venkateshwara-gopisetti/Bezier-Curves/blob/master/examples/quickstart.ipynb)
 
 <p align="center">
-  <img src="docs/assets/hero.gif" width="480" alt="Animation of de Casteljau's algorithm tracing a degree-4 Bézier curve">
+  <img src="https://raw.githubusercontent.com/venkateshwara-gopisetti/Bezier-Curves/master/docs/assets/hero.gif" width="480" alt="Animation of de Casteljau's algorithm tracing a degree-4 Bézier curve">
 </p>
 
 ## Install
@@ -54,7 +54,7 @@ A Bézier curve is defined by its control points (`A0 … A3` below). To find th
 2. Repeat on the new points (`C0, C1`), then again, until a single point is left.
 3. That point (red) is on the curve. Sweep `t` from 0 to 1 and it traces the whole curve.
 
-![The same cubic curve at t = 0.2, 0.4, 0.6 and 0.8](docs/assets/how-it-works.png)
+![The same cubic curve at t = 0.2, 0.4, 0.6 and 0.8](https://raw.githubusercontent.com/venkateshwara-gopisetti/Bezier-Curves/master/docs/assets/how-it-works.png)
 
 Every level is available to you:
 
@@ -62,7 +62,7 @@ Every level is available to you:
 steps = bv.casteljau_steps(ctrl, t=0.4)   # [A (4×2), B (3×2), C (2×2), point (1×2)]
 ```
 
-The same construction splits a curve exactly in two: `B0`, `C0` and the red point are the new control points of the left half.
+The same construction splits a curve exactly in two: `A0`, `B0`, `C0` and the red point are the control points of the left half.
 
 ## More operations
 

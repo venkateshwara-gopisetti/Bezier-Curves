@@ -255,4 +255,4 @@ def random_control_points(
     return rng.integers(int(low), int(high), size=(n, dim)).astype(np.float64)
 
 
-set_backend(os.environ.get(BACKEND_ENV_VAR, "auto"))
+set_backend(os.environ.get(BACKEND_ENV_VAR) or "auto")

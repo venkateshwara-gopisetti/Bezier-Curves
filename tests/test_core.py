@@ -192,14 +192,14 @@ def test_auto_backend():
         bv.set_backend(previous)
 
 
-@pytest.mark.parametrize("name", ["numpy", "auto"])
+@pytest.mark.parametrize("name", ["numpy", "auto", ""])
 def test_env_var_forces_backend(name):
     env = dict(os.environ, BEZIERVIS_BACKEND=name)
     out = subprocess.run(
         [sys.executable, "-c", "import beziervis; print(beziervis.get_backend())"],
         env=env, capture_output=True, text=True, check=True,
     ).stdout.strip()
-    expected = name if name != "auto" else ("numba" if bv.numba_available() else "numpy")
+    expected = name if name not in ("auto", "") else ("numba" if bv.numba_available() else "numpy")
     assert out == expected
 
 
