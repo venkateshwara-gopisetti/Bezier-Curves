@@ -25,8 +25,9 @@ from .ops import arc_length, derivative, elevate, split
 
 __version__ = "1.0.0"
 
-__all__ = [
+__all__ = [  # pylint: disable=undefined-all-variable  (BezierAnimation is lazy)
     "BERNSTEIN_MAX_DEGREE",
+    "BezierAnimation",
     "animate",
     "arc_length",
     "bernstein_matrix",
@@ -46,8 +47,17 @@ __all__ = [
 def animate(ctrl, **kwargs):
     """Build an animation of de Casteljau's construction (needs matplotlib).
 
-    See :class:`beziervis.animate.BezierAnimation` for the options.
+    See :class:`beziervis.BezierAnimation` for the options.
     """
-    from .animate import BezierAnimation  # pylint: disable=import-outside-toplevel
+    from .animation import BezierAnimation  # pylint: disable=import-outside-toplevel
 
     return BezierAnimation(ctrl, **kwargs)
+
+
+def __getattr__(name):
+    # Lazy so that importing beziervis never imports matplotlib.
+    if name == "BezierAnimation":
+        from .animation import BezierAnimation  # pylint: disable=import-outside-toplevel
+
+        return BezierAnimation
+    raise AttributeError(f"module 'beziervis' has no attribute {name!r}")
