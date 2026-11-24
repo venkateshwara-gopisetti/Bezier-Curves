@@ -25,9 +25,10 @@ from .ops import arc_length, derivative, elevate, split
 
 __version__ = "1.0.0"
 
-__all__ = [  # pylint: disable=undefined-all-variable  (BezierAnimation is lazy)
+# BezierAnimation is resolved lazily by __getattr__ below.
+__all__ = [
     "BERNSTEIN_MAX_DEGREE",
-    "BezierAnimation",
+    "BezierAnimation",  # pylint: disable=undefined-all-variable
     "animate",
     "arc_length",
     "bernstein_matrix",
