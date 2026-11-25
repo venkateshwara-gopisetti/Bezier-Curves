@@ -5,12 +5,18 @@
 [![Tests](https://github.com/venkateshwara-gopisetti/Bezier-Curves/actions/workflows/tests.yml/badge.svg)](https://github.com/venkateshwara-gopisetti/Bezier-Curves/actions/workflows/tests.yml)
 [![PyPI](https://img.shields.io/pypi/v/beziervis.svg)](https://pypi.org/project/beziervis/)
 [![Python](https://img.shields.io/pypi/pyversions/beziervis.svg)](https://pypi.org/project/beziervis/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/venkateshwara-gopisetti/Bezier-Curves/blob/master/LICENSE)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/venkateshwara-gopisetti/Bezier-Curves/blob/master/examples/quickstart.ipynb)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/venkateshwara-gopisetti/Bezier-Curves/master/docs/assets/hero.gif" width="480" alt="Animation of de Casteljau's algorithm tracing a degree-4 Bézier curve">
 </p>
+
+- **For learning:** animate de Casteljau's algorithm level by level, then save it as a GIF or MP4 or play it inline in Jupyter.
+- **For computing:** evaluate curves of any degree, in any dimension, singly or in batches of thousands. Under the hood this is a Bernstein-matrix NumPy core, with optional Numba kernels for a further 3–40× speed-up.
+- **Small:** the only required dependency is NumPy. Animation and acceleration are opt-in extras.
+
+[Quickstart notebook](https://colab.research.google.com/github/venkateshwara-gopisetti/Bezier-Curves/blob/master/examples/quickstart.ipynb) · [API](#api) · [CLI](#command-line) · [How it works](#how-de-casteljaus-algorithm-works) · [Performance](#performance) · [Contributing](https://github.com/venkateshwara-gopisetti/Bezier-Curves/blob/master/CONTRIBUTING.md) · [Changelog](https://github.com/venkateshwara-gopisetti/Bezier-Curves/blob/master/CHANGELOG.md)
 
 ## Install
 
@@ -19,32 +25,76 @@ pip install beziervis            # core: NumPy only
 pip install "beziervis[all]"     # + Numba acceleration and matplotlib animations
 ```
 
-The extras can also be installed separately: `[fast]` adds Numba and `[anim]` adds matplotlib and Pillow.
+| extra | adds | for |
+|---|---|---|
+| `[anim]` | matplotlib, Pillow | `animate()` and the `beziervis` command |
+| `[fast]` | Numba | JIT and multi-threaded evaluation, used automatically |
+| `[all]` | both | everything |
 
-## Get points
+Requires Python 3.10 or newer. Tested on Linux, macOS and Windows.
+
+## Quickstart
 
 ```python
 import beziervis as bv
 
-pts = bv.points([[0, 0], [5, 10], [9, 7], [4, 3]], n=200)   # (200, 2) NumPy array
+ctrl = [[0, 0], [5, 10], [9, 7], [4, 3]]       # 4 control points -> a cubic curve
+
+pts = bv.points(ctrl, n=200)                   # (200, 2) NumPy array, from ctrl[0] to ctrl[-1]
+bv.animate(ctrl, verbose=True).save("curve.gif")
 ```
 
-Control points can be a list or an array, in any dimension (`(k, d)` gives `(n, d)` points).
+<p align="center">
+  <img src="https://raw.githubusercontent.com/venkateshwara-gopisetti/Bezier-Curves/master/docs/assets/simple.gif" width="320" alt="A cubic Bézier curve being traced">
+</p>
 
-## Make a GIF
+- **Input:** control points can be a list or a NumPy array of shape `(k, d)`, in any dimension `d`; the result has shape `(n, d)`.
+- **Displaying:** `.show()` opens a window. In Jupyter, an animation that is the last expression in a cell plays inline.
+- **Saving:** `.save()` writes `.gif` (Pillow) or `.mp4` (needs ffmpeg), and works on servers and in CI without a display.
+
+## API
+
+| function | returns |
+|---|---|
+| `points(ctrl, n=100, t=None)` | `(n, d)` points at `n` evenly spaced `t` in [0, 1], or at the `t` values you pass |
+| `points_batch(curves, n=100)` | `(m, n, d)` points for `m` curves of equal degree, given as `(m, k, d)` |
+| `casteljau_steps(ctrl, t)` | every level of the construction: `[(k, d), (k-1, d), …, (1, d)]` |
+| `split(ctrl, t=0.5)` | `(left, right)`: two curves of the same degree that join at `t` |
+| `derivative(ctrl)` | control points of the derivative (hodograph) curve |
+| `elevate(ctrl, times=1)` | the same curve with `times` more control points |
+| `arc_length(ctrl)` | the curve's length (Gauss–Legendre quadrature, error around 1e-10) |
+| `animate(ctrl, frames=100, verbose=False, …)` | a `BezierAnimation` with `.save()`, `.show()` and `.to_jshtml()` |
+| `random_control_points(n, seed=None)` | `n` random integer points in [-100, 100) |
+| `set_backend(name)` / `get_backend()` | choose or report the backend: `"numpy"`, `"numba"` or `"auto"` |
+
+`animate()` also takes `labels`, `fps`, `hold` (frames to pause on the finished curve), `size` (pixels), `cmap` and `title`. Every function has a docstring with the details; try `help(bv.animate)`.
 
 ```python
-bv.animate([[0, 0], [5, 10], [9, 7], [4, 3]], verbose=True).save("curve.gif")
+import numpy as np
+
+left, right = bv.split(ctrl, 0.5)
+velocity    = bv.points(bv.derivative(ctrl), n=200)     # tangent vectors along the curve
+length      = bv.arc_length(ctrl)
+many        = bv.points_batch(np.random.rand(10_000, 4, 2), n=100)   # (10000, 100, 2)
 ```
 
-`.show()` opens a window instead. In Jupyter, the animation plays inline. From a terminal:
+## Command line
 
 ```bash
 beziervis --points "0,0 5,10 9,7 4,3" --verbose --save curve.gif
-beziervis -n 5 --seed 42          # 5 random control points, reproducible
+beziervis -n 5 --seed 42                  # 5 random control points, reproducible
+python -m beziervis --help                # same thing, without the script on PATH
 ```
 
-`save()` works on machines without a display (servers, CI), and `--save` writes `.gif` or `.mp4`.
+| option | meaning |
+|---|---|
+| `-p, --points "x,y x,y …"` | control points (otherwise random) |
+| `-n N` | number of random control points (default 4) |
+| `--seed S` | random seed |
+| `-v, --verbose` | draw the intermediate construction lines |
+| `-f, --frames F` / `--fps R` | animation steps (default 100) and playback speed (default 30) |
+| `--size PX` / `--no-labels` | figure size in pixels; hide point labels |
+| `-s, --save FILE` | write `.gif` or `.mp4` instead of opening a window |
 
 ## How de Casteljau's algorithm works
 
@@ -56,27 +106,15 @@ A Bézier curve is defined by its control points (`A0 … A3` below). To find th
 
 ![The same cubic curve at t = 0.2, 0.4, 0.6 and 0.8](https://raw.githubusercontent.com/venkateshwara-gopisetti/Bezier-Curves/master/docs/assets/how-it-works.png)
 
-Every level is available to you:
-
 ```python
 steps = bv.casteljau_steps(ctrl, t=0.4)   # [A (4×2), B (3×2), C (2×2), point (1×2)]
 ```
 
-The same construction splits a curve exactly in two: `A0`, `B0`, `C0` and the red point are the control points of the left half.
-
-## More operations
-
-```python
-left, right = bv.split(ctrl, t=0.5)       # two curves of the same degree
-d1     = bv.derivative(ctrl)              # control points of the derivative (tangent) curve
-up     = bv.elevate(ctrl, times=2)        # same shape, more control points
-length = bv.arc_length(ctrl)              # Gauss–Legendre quadrature, ~1e-10 accurate
-batch  = bv.points_batch(curves, n=100)   # (m, k, d) curves -> (m, n, d) points
-```
+The construction also splits a curve in two exactly: `A0, B0, C0` and the red point are the control points of the left half. This is how `split()` is implemented.
 
 ## Performance
 
-Points are evaluated with a precomputed **Bernstein matrix** and one matrix multiply. Above degree 30, where that becomes numerically fragile, a **vectorised de Casteljau** is used instead. When Numba is installed, JIT-compiled (and, for large inputs, multi-threaded) kernels are used automatically. Every backend agrees with the others to 1e-12.
+Points are evaluated with a precomputed **Bernstein matrix** and one matrix multiply. Above degree 30, where that becomes numerically fragile, a **vectorised de Casteljau** is used instead. When Numba is installed, JIT-compiled kernels (multi-threaded for large inputs) are used automatically. Every backend agrees with the others to within 1e-12.
 
 | case | naive Python | NumPy Bernstein | NumPy de Casteljau | Numba serial | Numba parallel |
 |---|---|---|---|---|---|
@@ -88,21 +126,33 @@ Points are evaluated with a precomputed **Bernstein matrix** and one matrix mult
 
 <sub>Best of 5 runs on Windows 11, Python 3.12, NumPy 2.5, Numba 0.68. To reproduce: `python benchmarks/bench.py`.</sub>
 
-To choose a backend, set `BEZIERVIS_BACKEND=numpy|numba|auto` or call `bv.set_backend("numpy")`. `bv.get_backend()` reports the backend in use.
+- **Choosing a backend:** set `BEZIERVIS_BACKEND=numpy|numba|auto` before import, or call `bv.set_backend(...)` at any time.
+- **First Numba call:** it compiles the kernels, which takes about a second the first time and is then cached on disk.
+- **Small inputs:** for a single curve with a few hundred points, every backend takes microseconds, so pick whichever you have installed.
+
+## FAQ
+
+**Saving `.mp4` fails.** MP4 needs [ffmpeg](https://ffmpeg.org/download.html) on your `PATH`. GIF needs only Pillow.
+
+**The animation is cluttered with many control points.** Use `verbose=False`, which draws only the polygon and the curve, or `labels=False`. Labels switch off automatically above 10 points.
+
+**Can I animate 3-D curves?** Not yet; `animate()` draws 2-D curves. The maths functions (`points`, `split`, `derivative`, …) work in any dimension. 3-D animation is on the [roadmap](https://github.com/venkateshwara-gopisetti/Bezier-Curves/issues).
+
+**How does this compare with the [`bezier`](https://pypi.org/project/bezier/) package?** `bezier` is a mature computational-geometry library with curve intersection, surfaces and a compiled core, and the right choice for CAD-grade geometry. beziervis is smaller and focused on teaching and visualising the construction, plus fast batch evaluation in pure NumPy or Numba.
 
 ## Contributing
 
-```bash
-pip install -e ".[dev]"
-pytest
-```
+Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](https://github.com/venkateshwara-gopisetti/Bezier-Curves/blob/master/CONTRIBUTING.md) for setup, tests and style. Issues labelled [good first issue](https://github.com/venkateshwara-gopisetti/Bezier-Curves/labels/good%20first%20issue) are a good place to start.
 
-Ideas and good first issues are in the [issue tracker](https://github.com/venkateshwara-gopisetti/Bezier-Curves/issues), for example 3-D animation, rational Béziers, or a B-spline comparison mode.
+```bash
+git clone https://github.com/venkateshwara-gopisetti/Bezier-Curves && cd Bezier-Curves
+pip install -e ".[dev]" && pytest
+```
 
 ## Citation
 
-If beziervis helps your research or teaching, please cite it. GitHub's "Cite this repository" button generates the citation from [`CITATION.cff`](CITATION.cff).
+If beziervis helps your research or teaching, please cite it. GitHub's "Cite this repository" button (from [`CITATION.cff`](https://github.com/venkateshwara-gopisetti/Bezier-Curves/blob/master/CITATION.cff)) gives BibTeX and APA.
 
 ## License
 
-[MIT](LICENSE) © Venkateshwara Gopisetti
+[MIT](https://github.com/venkateshwara-gopisetti/Bezier-Curves/blob/master/LICENSE) © Venkateshwara Gopisetti
