@@ -1,0 +1,36 @@
+name: Bug report
+description: Something doesn't work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you expected to happen, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Code that reproduces it
+      description: The smallest snippet or command you can find that shows the problem.
+      render: python
+      placeholder: |
+        import beziervis as bv
+        bv.points([[0, 0], [1, 1]], n=0)
+    validations:
+      required: true
+  - type: textarea
+    id: traceback
+    attributes:
+      label: Error message or traceback
+      render: text
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Run the command below and paste its output.
+      value: |
+        python -c "import sys, platform, numpy, beziervis as bv; print(bv.__version__, bv.get_backend(), numpy.__version__, sys.version, platform.platform())"
+    validations:
+      required: true
