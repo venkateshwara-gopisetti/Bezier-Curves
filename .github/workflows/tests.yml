@@ -61,4 +61,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e ".[dev]"
-      - run: pylint src/beziervis benchmarks docs
+      - run: pylint src/beziervis benchmarks docs examples

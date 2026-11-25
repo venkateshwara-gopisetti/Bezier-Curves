@@ -24,7 +24,7 @@ pip install -e ".[dev]"            # library + numba + matplotlib + pytest + pyl
 ```bash
 pytest                                   # all tests, on every installed backend
 BEZIERVIS_BACKEND=numpy pytest           # NumPy only (PowerShell: $env:BEZIERVIS_BACKEND="numpy"; pytest)
-pylint src/beziervis benchmarks docs     # must stay at 10.00/10
+pylint src/beziervis benchmarks docs examples   # must stay at 10.00/10
 ```
 
 CI runs these on Linux, macOS and Windows across Python 3.10–3.13, with and without Numba, and also checks that the core works with NumPy alone.
