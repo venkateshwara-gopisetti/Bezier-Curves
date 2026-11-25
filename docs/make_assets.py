@@ -1,8 +1,9 @@
-"""Regenerate the images in docs/assets/.
+"""Regenerate the images in docs/assets/, including the examples gallery in docs/assets/gallery/.
 
     python docs/make_assets.py
 """
 
+import runpy
 from pathlib import Path
 
 import matplotlib
@@ -13,6 +14,7 @@ from matplotlib.figure import Figure
 import beziervis as bv
 
 ASSETS = Path(__file__).parent / "assets"
+EXAMPLES = Path(__file__).parent.parent / "examples"
 HERO = [[-80, -60], [-60, 70], [10, 90], [70, 40], [85, -70]]
 CUBIC = [[0, 0], [5, 10], [9, 7], [4, 3]]
 
@@ -68,6 +70,14 @@ def social_preview():
     fig.savefig(ASSETS / "social-preview.png", facecolor="white")
 
 
+def gallery():
+    """Run every script in examples/ and collect its image in assets/gallery/."""
+    out = ASSETS / "gallery"
+    out.mkdir(parents=True, exist_ok=True)
+    for script in sorted(EXAMPLES.glob("*.py")):
+        runpy.run_path(str(script))["main"](out)
+
+
 def main():
     """Write every asset and print the file sizes."""
     ASSETS.mkdir(parents=True, exist_ok=True)
@@ -76,8 +86,9 @@ def main():
     bv.animate(CUBIC, frames=60, fps=30, hold=30, size=360).save(str(ASSETS / "simple.gif"))
     how_it_works()
     social_preview()
-    for path in sorted(ASSETS.iterdir()):
-        print(f"{path.name:22} {path.stat().st_size / 1024:8.0f} KiB")
+    gallery()
+    for path in sorted(p for p in ASSETS.rglob("*") if p.is_file()):
+        print(f"{path.relative_to(ASSETS).as_posix():32} {path.stat().st_size / 1024:8.0f} KiB")
 
 
 if __name__ == "__main__":

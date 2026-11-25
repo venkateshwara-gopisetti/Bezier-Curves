@@ -4,6 +4,9 @@ All notable changes are listed here. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+- Examples gallery: ten scripts in `examples/` (loop animation, generative art, calligraphy, CSS easing, curvature comb, 3-D helix, heart, arc-length spacing, subdivision, degree elevation), shown in the README. `docs/make_assets.py` regenerates the images, and a test runs every example.
+
 ## [1.0.0] - 2026-11-25
 
 The repository is relaunched as the `beziervis` package.
