@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "beziervis"
+dynamic = ["version"]
+description = "Fast Bézier curve evaluation in NumPy, with animations of de Casteljau's algorithm."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Venkateshwara Gopisetti" }]
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.23"]
+keywords = ["bezier", "bezier-curve", "de-casteljau", "geometry", "animation", "visualization", "numpy", "numba"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Multimedia :: Graphics",
+]
+
+[project.optional-dependencies]
+fast = ["numba>=0.59"]
+anim = ["matplotlib>=3.6", "pillow>=9"]
+all = ["beziervis[fast,anim]"]
+dev = ["beziervis[all]", "pytest>=7", "pylint>=3"]
+
+[project.scripts]
+beziervis = "beziervis.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/venkateshwara-gopisetti/Bezier-Curves"
+Issues = "https://github.com/venkateshwara-gopisetti/Bezier-Curves/issues"
+
+[tool.hatch.version]
+path = "src/beziervis/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/beziervis"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.pylint."messages control"]
+disable = ["invalid-name"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/beziervis", "tests", "README.md", "LICENSE", "CITATION.cff", "pyproject.toml"]
